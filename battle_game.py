@@ -25,19 +25,51 @@ class BattleGame:
         print("Game initialized successfully.")
         pygame.init()
         self.font = pygame.font.SysFont(None, 24)
-        self.screen = pygame.display.set_mode((self.window_size, self.window_size))
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height))
         self.selected_piece = None
         self.current_player = 1
         self.selected_is_king = False
         # ログ用の変数と Tkinter のログウィンドウを作成
         self.log_messages = []
+        self.setup_log_window()
 
+    def setup_log_window(self):
+        """Setup the log window for game messages"""
+        try:
+            self.log_window = tk.Tk()
+            self.log_window.title("Battle Game Log")
+            self.log_window.geometry("400x300")
+            
+            # Create scrolled text widget for logs
+            self.log_display = scrolledtext.ScrolledText(
+                self.log_window, 
+                width=50, 
+                height=15,
+                wrap=tk.WORD
+            )
+            self.log_display.pack(fill='both', expand=True, padx=10, pady=10)
+            
+            # Initially hide the window, show it when game starts
+            self.log_window.withdraw()
+            
+        except Exception as e:
+            print(f"Warning: Could not create log window: {e}")
+            self.log_window = None
+    
     #ログ表示用の関数
     def log(self, message):
         print(message)
         self.log_messages.append(message)
         if len(self.log_messages) > 10:
             self.log_messages.pop(0)
+        
+        # Update log window if it exists
+        if hasattr(self, 'log_display') and self.log_display:
+            try:
+                self.log_display.insert(tk.END, message + "\n")
+                self.log_display.see(tk.END)
+            except:
+                pass
     def place_pieces(self):
         print("Placing pieces on the board...")
         for player in self.players:
@@ -245,10 +277,22 @@ class BattleGame:
         self.log(f"Next turn: Player {self.current_player}")
 
     def game_loop(self):
+        # Show the log window when game starts
+        if self.log_window:
+            self.log_window.deiconify()
+            
+        pygame.display.set_caption("Battle Game")
         running = True
         while running:
             self.draw_board()
-            self.log_window.update()  # Tkinterウィンドウの更新
+            
+            # Update log window if it exists
+            if self.log_window:
+                try:
+                    self.log_window.update()
+                except:
+                    pass
+                    
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -263,8 +307,13 @@ class BattleGame:
                         self.move_selected_piece((0, -1))
                     elif event.key == pygame.K_d:
                         self.move_selected_piece((0, 1))
+        
         pygame.quit()
-        self.log_window.destroy()
+        if self.log_window:
+            try:
+                self.log_window.destroy()
+            except:
+                pass
 if __name__ == "__main__":
     game = BattleGame()
     game.game_loop()

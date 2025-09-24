@@ -1,0 +1,60 @@
+🃏 TexasSolver GTO Poker API Integration Demo
+============================================================
+
+📊 1. Range Analysis for Different Positions
+--------------------------------------------------
+UTG: 16 hands - AA, KK, QQ, JJ, TT...
+CO : 27 hands - AA, KK, QQ, JJ, TT...
+BTN: 42 hands - AA, KK, QQ, JJ, TT...
+
+💰 2. Equity Analysis for Premium Hands
+--------------------------------------------------
+AA : 85.0% vs 1 opponent, 44.4% vs 5 opponents
+KK : 82.0% vs 1 opponent, 42.8% vs 5 opponents
+AKs: 67.0% vs 1 opponent, 35.0% vs 5 opponents
+QQ : 80.0% vs 1 opponent, 41.8% vs 5 opponents
+AKo: 65.0% vs 1 opponent, 33.9% vs 5 opponents
+
+🎯 3. Spot Analysis Example
+--------------------------------------------------
+Spot: BTN vs MP raise
+Expected Value: +0.150 BB
+Exploitability: 0.050
+
+🏆 4. Tournament Simulation
+--------------------------------------------------
+Simulated 500 tournament spots:
+Average EV: +0.1500 BB per spot
+Win Rate: 100.0%
+Projected Hourly Rate: +15.00 BB/hour
+
+📈 5. Hand vs Range Analysis
+--------------------------------------------------
+AKo vs BTN range: 65.0% equity
+QQ  vs BTN range: 80.0% equity
+A5s vs BTN range: 50.0% equity
+76s vs BTN range: 50.0% equity
+
+🎲 6. Optimal Sizing Recommendations
+--------------------------------------------------
+UTG: Bet  6.0 (0.6x pot), Raise 22.0 (2.2x)
+CO : Bet  7.0 (0.7x pot), Raise 28.0 (2.8x)
+BTN: Bet  7.5 (0.8x pot), Raise 30.0 (3.0x)
+
+💾 7. Export Functionality
+--------------------------------------------------
+Ranges exported to /tmp/exported_ranges.json
+Exported ranges to /tmp/exported_ranges.json
+Sample - BTN range contains 42 hands
+
+✅ Demo Complete!
+============================================================
+The TexasSolver GTO Poker API integration provides:
+• Comprehensive range analysis for all positions
+• Accurate equity calculations vs opponents and ranges
+• GTO spot analysis for complex situations
+• Tournament simulation tools
+• Optimal sizing recommendations
+• Data export for further research
+
+Use poker_research_gui.py for the interactive GUI version!
