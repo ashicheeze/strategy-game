@@ -1,16 +1,33 @@
+"""Integrated Strategy Game launcher.
+
+This module combines the pygame based battle game with the Tkinter poker
+research GUI.  In headless environments (like CI containers) there is no X11
+display available, which previously caused pygame to abort immediately.  The
+new implementation detects such situations and offers a textual fallback so
+the script can still be executed for automated smoke tests or demonstrations.
 """
-Integrated Strategy Game with Poker Research
-Combines the existing battle game with poker GTO analysis capabilities
-"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import threading
+from typing import Optional
+
+if not os.environ.get("DISPLAY") and sys.platform != "win32":
+    # In CI or other headless environments pygame cannot open a window.  The
+    # dummy driver allows pygame to initialise without a display so we can run
+    # non-interactive smoke tests.
+    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 import pygame
 import tkinter as tk
-from tkinter import ttk, messagebox
-import numpy as np
+from tkinter import messagebox
+
 from battle_game import BattleGame
 from poker_research_gui import PokerResearchGUI
-import threading
-import sys
 
 class IntegratedStrategyGame:
     """
@@ -249,16 +266,73 @@ different game types and improve your decision-making skills.
             self.root.destroy()
             sys.exit()
 
-def main():
-    """Main entry point"""
+def is_headless() -> bool:
+    """Return True if the environment has no available graphical display."""
+
+    if sys.platform == "win32":
+        # Windows always provides a display surface, so we only treat UNIX-like
+        # systems without DISPLAY as headless.
+        return False
+
+    return not os.environ.get("DISPLAY")
+
+
+def run_headless_mode(message: Optional[str] = None) -> None:
+    """Provide a textual fallback when no GUI can be created."""
+
+    header = "=" * 60
+    print(header)
+    print("Integrated Strategy Game Hub - Headless Mode")
+    print(header)
+    if message:
+        print(message)
+        print()
+
+    print(
+        "A graphical display was not detected, so the interactive "
+        "Tkinter/Pygame interface cannot be shown.\n"
+        "You can still experiment with the analytical tooling from the "
+        "command line:"
+    )
+    print("  • python poker_solver.py --help        # explore solver options")
+    print("  • python demo.py                       # text-based walkthrough")
+    print()
+    print(
+        "To launch the full GUI experience, run this program on a machine with "
+        "an available desktop session."
+    )
+
+
+def main(argv: Optional[list[str]] = None) -> None:
+    """Main entry point supporting a headless fallback."""
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Launch the integrated battle game and poker research hub. "
+            "Use --headless to force a textual fallback."
+        )
+    )
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="Run without creating GUI windows (useful in CI environments).",
+    )
+    args = parser.parse_args(argv)
+
+    if args.headless or is_headless():
+        run_headless_mode(
+            "Headless execution requested." if args.headless else None
+        )
+        return
+
     try:
         app = IntegratedStrategyGame()
         app.run()
     except KeyboardInterrupt:
         print("\nApplication interrupted by user")
         sys.exit(0)
-    except Exception as e:
-        print(f"Fatal error: {e}")
+    except Exception as exc:  # pragma: no cover - defensive safeguard
+        print(f"Fatal error: {exc}")
         sys.exit(1)
 
 if __name__ == "__main__":
